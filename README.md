@@ -33,7 +33,7 @@ server(port,rootDir,prefix,function(){console.log('server listening on '+port)})
 The server can act as a file browser if `?read` is appended to the url; in this case, you'll find all the meta-data
 in the headers.
 The final function is optional.
-(go to `server/` and run `index.js` to check an example of server)
+*(go to `examples/simple-server` and run `node index.js` to check an example of server)*
 
 
 or as an express middleWare:
@@ -49,6 +49,7 @@ app.use(function(req,res,next){
 })
 ```
 
+*(go to `examples/express` and run `npm install && node index.js` to check an example of a bare bones express app)*
 
 -----
 
