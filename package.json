@@ -1,0 +1,45 @@
+{
+  "name": "infoserver",
+  "version": "0.0.1",
+  "description": "static file server that spews a bunch of metadata with files",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "bluebird": "^2.9.34",
+    "exif": "^0.4.0",
+    "id3js": "^1.1.3",
+    "image-size": "^0.3.5",
+    "ini": "^1.3.4",
+    "js-yaml": "^3.3.1",
+    "mime": "^1.3.4",
+    "send": "^0.13.0",
+    "xml2js": "^0.4.9"
+  },
+  "devDependencies": {
+
+    },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Xananax/infoserver.git"
+  },
+  "keywords": [
+    "static",
+    "server",
+    "id3",
+    "exif",
+    "yaml",
+    "ini",
+    "json"
+  ],
+  "author": "xananax@yelostudio.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Xananax/infoserver/issues"
+  },
+  "homepage": "https://github.com/Xananax/infoserver#readme"
+}
