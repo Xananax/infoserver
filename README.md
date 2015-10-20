@@ -1,186 +1,213 @@
 # InfoServer
 
-static file server that provides as much info as possible about the files.
+File manager server & middleware
 
-## Usage
+# Usage
 
 ```
-npm install --save InfoServer
+npm install --save infoserver
 ```
 
 Then, in your js:
 
 ```js
-var infoServer = require('infoserver');
-infoServer(filePath)
-    .then(function(fileInfo){
-        console.log(fileInfo);
-    })
-    .catch(function(err){
-        console.log(err);
-    });
-```
 
-Or as an http server:
-```js
-var infoServer = require('infoserver') 
-var server = infoServer.server;
-var rootDir = __dirname;
-var port = 1337;
-var prefix = 'xinfo';
-server(port,rootDir,prefix,function(){console.log('server listening on '+port)})
-```
-The server can act as a file browser if `?read` is appended to the url; in this case, you'll find all the meta-data
-in the headers.
-The final function is optional.
-*(go to `examples/simple-server` and run `node index.js` to check an example of server)*
+import infoServer from 'infoserver';
 
-
-or as an express middleWare:
-```js
-var app = require('express').app
-var rootDir = __dirname;
-var key = 'xinfo'
-var infoServer = require('infoserver').middleWare(rootDir,key)
-app.use('/metadata',infoServer);
-app.use(function(req,res,next){
-    var metadata = req[key];
-    //do something with the metadata
+infoServer(rootDir,{/**options**/}).then(api=>
+    api.commands.getMeta('/some/file/path')
+        .then(result=>{console.log(results)})
+        .catch(err=>{throw err})
 })
+
+```
+
+or as an express middleware:
+```js
+
+var app = require('express').app
+import infoServer from 'infoserver';
+
+infoServer(rootDir,{/**options**/}).then(api=>
+    app.use('/meta',api.middleware);
+})
+
 ```
 
 *(go to `examples/express` and run `npm install && node index.js` to check an example of a bare bones express app)*
 
 -----
 
-## Methods:
+# infoServer(rootDir,options) → Promise
 
-#### infoServer([rootDir,]path).then().catch()
-fetches metadata for a file located at `path` and returns it.  
-Optional `rootDir` gets prepended to `path` and removed from a file's `fullPath` property.
+- `rootDir` is your public directory
+- `options` is an object with the following switches:
+    + `adapter`: provide an adapter database for collections (see below for spec).
+    + `persist`: either a boolean, or a file path. Used by the default memory adapter to write/load the database to/from a json file. Only use it to prototype, provide your own adapter for production
+    + `filters`: an array of filters used by `getMeta` and `getMetaRecursive`.
 
-### infoServer.server(port,rootDir,prefix)
-fetches metadata and returns it in the browser as json. `port` specifies the port to listen on;
-`rootDir` is the public directory, and `prefix` is used to prepend to headers.
-
-### infoServer.middleWare(rootDir,prefix)
-Acts the same as `server`. the `prefix` is used to set the fetched data on the `request` object.
-
-----
-
-## Anatomy
-
-Here is an example data returned by infoServer:
-
-```js
-{
-    "isDirectory": false,
-    "isFile": true,
-    "dev": 2051,
-    "mode": 33184,
-    "nlink": 1,
-    "uid": 1000,
-    "gid": 1000,
-    "rdev": 0,
-    "blksize": 4096,
-    "ino": 6323559,
-    "blocks": 1360,
-    "atime": "2015-07-28T18:52:33.497Z",
-    "mtime": "2015-03-21T12:41:15.344Z",
-    "ctime": "2015-07-28T18:52:33.424Z",
-    "birthtime": "2015-07-28T18:52:33.424Z",
-    "mimetype": "image/jpeg",
-    "mime": [
-        "image",
-        "jpeg"
-    ],
-    "path": "public/directory/frontblueprint.jpg",
-    "fullPath": "public/directory/frontblueprint.jpg",
-}
-```
-
-#### Additionally:
-
-- text files will have a property called `fileContents` that contains the text
-- yaml, ini, xml, json files are treated as text files, but will also contain a property `data` that contains the parsed data, or `error` that contains the error produced while trying to parse
-- mp3s will have a property called `tags` containing id3 v1 and v2 tags
-- images will have a `size` property containing their size, and an `exif` property containing exif data.
-
-Example of additional image properties:
-```js
-{
-    "size": {
-        "height": 1535,
-        "width": 2269,
-        "type": "jpg"
-    },
-    "exif": {
-        "image": {
-            "Orientation": 1,
-            "XResolution": 200,
-            "YResolution": 200,
-            "ResolutionUnit": 2,
-            "Software": "Adobe Photoshop CS Windows",
-            "ModifyDate": "2004:05:20 20:21:43",
-            "ExifOffset": 164
-        },
-        "thumbnail": {
-            "Compression": 6,
-            "XResolution": 72,
-            "YResolution": 72,
-            "ResolutionUnit": 2,
-            "ThumbnailOffset": 302,
-            "ThumbnailLength": 4438
-        },
-        "exif": {
-            "ColorSpace": 65535,
-            "ExifImageWidth": 2269,
-            "ExifImageHeight": 1535
-        },
-        "gps": {},
-        "interoperability": {},
-        "makernote": {}
-    }
-}
-```
-
-Example of additional mp3 properties:
-```js
-{
-    "tags": {
-        "title": "Allegro from Duet in C Major",
-        "album": "Some Album",
-        "artist": "Someone",
-        "year": "2000",
-        "v1": {
-            "title": "Allegro from Duet in C Major",
-            "artist": "Someone",
-            "album": "Some Album",
-            "year": "2000",
-            "comment": "",
-            "track": 1,
-            "version": 1.1,
-            "genre": "Classical"
-        },
-        "v2": {
-            "version": [4,0],
-            "title": "Allegro from Duet in C Major",
-            "artist": "Someone",
-            "album": "Some Album",
-            "genre": "Classical",
-            "recording-time": "2000",
-            "track": "1",
-            "copyright": "",
-            "language": "",
-            "publisher": ""
-        }
-    }
-}
-```
-
+The promise resolves to an api generated by [apido](https://github.com/Xananax/apido).
 
 ---
 
-## License
+# commands
 
-MIT
+All commands from [fs-meta](https://github.com/Xananax/fs-meta), plus:
+
+---
+
+# Selections
+
+infoserver exposes a selections api to group files together. They work like virtual directories in the sense that they can contain files, or other selections.
+
+All selections commands use an adapter for persistence. Only a memory adapter is provided by default, to create your own, see the spec below.
+
+All arrays can be specified, in a GET array, either by repeating the key (`?files=x&files=y`), or by separating them with a comma (`?files=x,y`).
+
+## api.selections.commands.add(groupName[,files[,groups]])
+
+Adds a group called `groupName` and adds the files and groups specified. If `groupName` does not exist, it is created. If it already has files or groups, new files and groups are appended.
+
+Also accessible through `api.runPath('/selections/add',{groupName,files,groups})`
+or on the http url `/selections/add/:groupName?files=x&files=y&groups=x&groups=y`
+
+
+## api.selections.commands.get([type,items])
+
+if nothing is specified, returns all groups that are children of the `root` group.
+`items` is an array of files paths if `type` is `"file"`, or an array of groups names if `type` is `"group"`
+
+Also accessible through `api.runPath('/selections/get',{type,items})`
+or on the http url `/selections/get/:type?items=a&items=b`
+
+## api.selections.commands.remove(groupName[,files[,groups]])
+
+If `files` or `groups` are not specified, deletes the group designed by `groupName`, as well as any files that are only in that specific group. if `files` and `groups` are specified, removes the specified files and sub-groups from the group. Orphan files are removed, but orphan groups aren't.
+
+Also accessible through `api.runPath('/selections/remove',{groupName,files,groups})`
+or on the http url `/selections/remove/:groupName?files=x&files=y&groups=x&groups=y`
+
+## Objects
+
+An example response from `selections/get/a`:
+
+```js
+{
+    response:"success",
+    //api meta data...
+    "result":{
+        "groups": {
+            "groupA": {
+                "name": "groupA",
+                "files": ["path/to/a","path/to/b","path/to/c"],
+                "groups": []
+                }
+            },
+        "files": {
+            "path/to/a": {
+                "path": "path/to/a",
+                "parents": ["groupA"]
+            },
+            "path/to/b": {
+                "path": "path/to/b",
+                "parents": ["groupA"]
+            },
+            "path/to/c": {
+                "path": "path/to/c",
+                "parents": ["groupA","groupB"]
+            }
+        }
+    }
+} 
+```
+
+Here's an easy function to re-nest everything in a cyclic structure if you wanted to:
+
+```js
+function nest({result},cache){
+    cache = cache || {
+        groups:{}
+    ,   files:{}
+    }
+    function add(collection,value){
+        const key = collection == 'files' ? 'path' : 'name';
+        const obj = {[key]:value};
+        cache[collection][value] = obj;
+        return obj; 
+    }
+    for(group of result.groups){
+        let {name} = group;
+        let files = group.files.map(path=>
+            result.files[path] || cache.files[path] || add('files',path)
+        )
+        let groups = group.groups.map(name=>
+            result.groups[name] || cache.groups[name]|| add('groups',name)
+        )
+        if(cache.groups[name]){
+            Object.assign(cache.groups[name],{files,groups});
+        }else{
+            cache.groups[name] = {name,files,groups}
+        }
+    }
+    for(file of result.paths){
+        let {path} = file;
+        file.parents = file.parents.map(name=>
+            result.groups[name] || cache.groups[name] || add('groups',name)
+        )
+        if(cache.files[path]){
+            cache.files[path].parents = parents;
+        }else{
+            cache.files[path] = {path,parents}
+        }        
+    }
+    return cache;
+}
+```
+
+---
+
+# Adapter
+
+An adapter has the following signature:
+
+```js
+export default Promise.promisify(function customAdapter(fs,opts,cb){
+     const commands = {
+        add(groupName,files,groups,cb){}
+    ,   getFiles(files,cb){}
+    ,   getGroups(groups,cb){}
+    ,   getRoot(cb){}
+    ,   remove(groupName,files,groups,cb){}
+    }
+    cb(null,commands);
+})
+```
+
+- `add` is guaranteed to receive a group name, but `files` and `groups` are optional. If a group doesn't exist, it is expected that `add` creates it on the fly. If it already exists, then `groups` and `files` should be added to the existing groups and files.
+- `getFiles` receives an array of files paths
+- `getGroups` receives an array of group names
+- `remove` is guaranteed to receive a group name, but `files` and `groups` are optional. If `groups` and `files` are empty, then the function should remove the group specified by `groupName` (as well as cascade all relations). If either `files` or `groups` are specified, then the group should remove all 
+
+---
+
+# MIT License
+
+Copyright © Jad Sarout
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the “Software”), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
