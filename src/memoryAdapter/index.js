@@ -1,4 +1,5 @@
 import add from './add'
+import addRoot from './addRoot'
 import getFiles from './getFiles'
 import getGroups from './getGroups'
 import getRoot from './getRoot'
@@ -46,6 +47,9 @@ export default Promise.promisify(function memoryAdapterFactory(fs,opts,cb){
 	const methods = {
 		add(groupName,files,groups,cb){
 			add(db,groupName,files,groups,save(cb))
+		}
+	,	addRoot(groups,cb){
+			addRoot(db,groups,cb)
 		}
 	,	getFiles(files,cb){
 			getFiles(db,files,cb)

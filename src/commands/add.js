@@ -1,6 +1,7 @@
 import groupName from './parameters/groupName';
 import files from './parameters/files';
 import groups from './parameters/groups';
+import root from './parameters/root';
 
 export default function addGroup(adapter){
 	return {
@@ -12,9 +13,10 @@ export default function addGroup(adapter){
 	,	optionalParameters:[			
 			files
 		,	groups
+		,	root
 		]
-	,	run({groupName,files,groups},cb){
-			adapter.add(groupName,files,groups,cb);
+	,	run({groupName,files,groups,root},cb){
+			adapter.add(groupName,files,groups,root,cb);
 		}
 	}
 }
