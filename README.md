@@ -190,6 +190,40 @@ export default Promise.promisify(function customAdapter(fs,opts,cb){
 
 ---
 
+# Tests & Compile
+
+First:
+```bash
+npm install --dev
+```
+
+Compile:
+```bash
+npm run compile
+```
+
+tests:
+```bash
+Not implemented yet
+```
+
+run example:
+```bash
+cd examples/express
+npm install
+cd ../..
+npm start
+```
+Then open http://localhost:3000 in your browser
+
+To get debug messages, you can set:
+```sh
+DEBUG=infoserver:* node yourApp.js
+```
+
+
+---
+
 # MIT License
 
 Copyright © Jad Sarout

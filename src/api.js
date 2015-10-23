@@ -4,12 +4,23 @@ import {boxed} from 'fs-meta';
 import fsCommandsProps from 'fs-meta/lib/api/commands';
 import selectionCommandsProps from './commands';
 import memoryAdapterFactory from './memoryAdapter';
+var debug = require('debug')('infoserver')
 
 export default Promise.promisify(function makeAPI(rootdir,options,cb){
+
+	debug('creating infoServer API')
 
 	const fs = boxed(rootdir);
 
 	const adapter = (options && options.adapter) || memoryAdapterFactory
+
+	if(options){
+		for(let name in options){
+			debug(`option: ${name}:${options[name]}`)
+		}
+	}else{
+		debug('no options')
+	}
 
 	adapter(fs,options).then(adapter=>
 		apido({
@@ -43,6 +54,7 @@ export default Promise.promisify(function makeAPI(rootdir,options,cb){
 		})
 		api.nest(selectionsApi);
 		api.selections = selectionsApi;
+		debug('api ready')
 		cb(null,api)
 	})
 	.error(cb)
