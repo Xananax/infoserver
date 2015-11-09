@@ -38,10 +38,30 @@ export function getGroups(db,groups,ret,cb){
 	})();
 }
 
+
+function processObj(obj){
+	const indexes = {}
+	const items = []
+	Object.keys(obj).forEach(key=>{
+		const item = obj[key];
+		getIndex(item,key,indexes,items)
+		item.groups && item.groups.forEach(skey=>getIndex(obj[skey],skey,indexes,items))
+	})
+
+	return {indexes,items,obj}
+}
+
+function getIndex(item,key,indexes,items){
+	indexes[key] = items.push(item) -1;
+}
+
 export default function getGroupsWithoutCache(db,groups,cb){
 	const ret = {
 		groups:{}
 	,	files:{}
 	};
-	getGroups(db,groups,ret,cb);
+	getGroups(db,groups,ret,(err,result)=>{
+		if(err){return cb(err);}
+		cb(null,result);
+	});
 }

@@ -18,7 +18,7 @@ export default function add(db,groupName,files,groups,root,cb){
 		groups = groups.map(childGroupName=>{
 			if(childGroupName == groupName){return false;}
 			const childGroup = getOrCreateGroup(db,childGroupName);
-			childGroup.parents = appendArray(childGroup.parents,[groupName]);
+			childGroup.groups = appendArray(childGroup.groups,[groupName]);
 			return childGroupName;
 		}).filter(Boolean)
 	}

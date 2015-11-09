@@ -1,5 +1,5 @@
 import Promise from 'bluebird';
-import apido from 'apido/src';
+import apido from 'apido';
 import {boxed} from 'fs-meta';
 import fsCommandsProps from 'fs-meta/lib/api/commands';
 import selectionCommandsProps from './commands';
